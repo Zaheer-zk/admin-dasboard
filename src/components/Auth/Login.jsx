@@ -1,18 +1,28 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
+import OTPVerification from './OTPVerification';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate();
+
+  const handleVerifyOTP = (otp) => {
+    if (otp === '1234') {
+      navigate('/');
+    } else {
+      alert('Invalid OTP. Please try again.');
+    }
+  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     try {
       await AuthService.login(email, password);
-      navigate('/');
+      setShowModal(true);
     } catch (error) {
       console.error(error);
     }
@@ -71,6 +81,11 @@ const Login = () => {
           </Link>
         </div>
       </div>
+      <OTPVerification
+        showModal={showModal}
+        onClose={() => setShowModal(false)}
+        handleVerifyOTP={handleVerifyOTP}
+      />
     </div>
   );
 };
