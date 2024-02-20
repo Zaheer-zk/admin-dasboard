@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import EditUserData from './EditUserData';
+import { useNavigate } from 'react-router-dom';
 
 const AllUsersTable = () => {
   const [users, setUsers] = useState([
@@ -28,6 +29,8 @@ const AllUsersTable = () => {
     { id: 21, name: 'Rudra Srivastava', email: 'rudra@example.com' },
   ]);
   const [editingUser, setEditingUser] = useState(null);
+
+  const navigate = useNavigate();
 
   const handleEditUser = (user) => {
     setEditingUser(user);
@@ -59,7 +62,10 @@ const AllUsersTable = () => {
           <h2 className='text-lg font-semibold text-gray-900'>All Users</h2>
         </div>
         <div>
-          <button className='py-2.5 px-4 rounded transition duration-200 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 hover:text-white shadow-md flex items-center'>
+          <button
+            className='py-2.5 px-4 rounded transition duration-200 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 hover:text-white shadow-md flex items-center'
+            onClick={() => navigate('/create-user')}
+          >
             <FontAwesomeIcon icon={faPlus} className='mr-2' />
             Create User
           </button>

@@ -2,8 +2,9 @@ import { Outlet, createBrowserRouter } from 'react-router-dom';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
-import AllUsersTable from './components/common/AllUsersTable';
 import DashboardBox from './components/Dashboard/DashboardBox';
+import AllUsersTable from './components/User/AllUsersTable';
+import CreateNewUser from './components/User/CreateNewUser';
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
           {
             path: '/users',
             element: <AllUsersTable />,
+          },
+          {
+            path: '/create-user',
+            element: <CreateNewUser />,
           },
         ],
       },
