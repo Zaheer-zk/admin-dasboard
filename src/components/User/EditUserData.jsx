@@ -3,9 +3,14 @@ import React, { useState } from 'react';
 const EditUserData = ({ user, onSave, onClose }) => {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
+  const [isActive, setIsActive] = useState(user.isActive);
+
+  const handleOptionChange = (e) => {
+    setIsActive(e.target.value);
+  };
 
   const handleSave = () => {
-    onSave({ id: user.id, name, email });
+    onSave({ id: user.id, name, email, isActive });
     onClose();
   };
 
@@ -27,6 +32,13 @@ const EditUserData = ({ user, onSave, onClose }) => {
             required
             className='w-full px-4 py-2 border rounded-md mb-4'
           />
+          <select
+            className='w-full px-4 py-2 border rounded-md mb-4'
+            onChange={(e) => handleOptionChange(e)}
+          >
+            <option value={true}>True</option>
+            <option value={false}>False</option>
+          </select>
           <div className='flex justify-end'>
             <button
               type='submit'

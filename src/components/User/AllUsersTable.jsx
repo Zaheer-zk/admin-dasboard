@@ -1,33 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import EditUserData from './EditUserData';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AllUsersTable = () => {
-  const [users, setUsers] = useState([
-    { id: 1, name: 'Aarav Sharma', email: 'aarav@example.com' },
-    { id: 2, name: 'Aditi Patel', email: 'aditi@example.com' },
-    { id: 3, name: 'Aryan Gupta', email: 'aryan@example.com' },
-    { id: 4, name: 'Ishaan Khan', email: 'ishaan@example.com' },
-    { id: 5, name: 'Ananya Kumar', email: 'ananya@example.com' },
-    { id: 6, name: 'Anika Shah', email: 'anika@example.com' },
-    { id: 7, name: 'Kabir Reddy', email: 'kabir@example.com' },
-    { id: 8, name: 'Aisha Joshi', email: 'aisha@example.com' },
-    { id: 9, name: 'Advik Singh', email: 'advik@example.com' },
-    { id: 10, name: 'Diya Mishra', email: 'diya@example.com' },
-    { id: 11, name: 'Reyansh Chopra', email: 'reyansh@example.com' },
-    { id: 12, name: 'Shreya Nair', email: 'shreya@example.com' },
-    { id: 13, name: 'Vihaan Tiwari', email: 'vihaan@example.com' },
-    { id: 14, name: 'Myra Gupta', email: 'myra@example.com' },
-    { id: 15, name: 'Arjun Malhotra', email: 'arjun@example.com' },
-    { id: 16, name: 'Riya Sharma', email: 'riya@example.com' },
-    { id: 17, name: 'Vivaan Verma', email: 'vivaan@example.com' },
-    { id: 18, name: 'Prisha Singh', email: 'prisha@example.com' },
-    { id: 19, name: 'Atharva Sahu', email: 'atharva@example.com' },
-    { id: 20, name: 'Aadhya Mehra', email: 'aadhya@example.com' },
-    { id: 21, name: 'Rudra Srivastava', email: 'rudra@example.com' },
-  ]);
+  const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
 
   const navigate = useNavigate();
@@ -54,6 +33,21 @@ const AllUsersTable = () => {
     setUsers(updatedUsers);
     alert(`User ${user.name} has been successfully deleted.`);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await axios.get('http://localhost:8000/api/users');
+
+        console.log('data: ', data);
+        setUsers(data);
+      } catch (e) {
+        console.log('data fetching error: ', e);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className='overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg'>
@@ -91,16 +85,44 @@ const AllUsersTable = () => {
                 scope='col'
                 className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
               >
+                Gender
+              </th>
+              <th
+                scope='col'
+                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
+              >
+                Is Active
+              </th>
+              <th
+                scope='col'
+                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
+              >
+                Is Verified
+              </th>
+              <th
+                scope='col'
+                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
+              >
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className='divide-y divide-gray-200'>
+            {users.length === 0 && <h2>No users found</h2>}
             {users.map((user, index) => (
               <tr key={index}>
                 <td className='px-3 py-4 text-sm text-gray-900'>{user.name}</td>
                 <td className='px-3 py-4 text-sm text-gray-900'>
                   {user.email}
+                </td>
+                <td className='px-3 py-4 text-sm text-gray-900'>
+                  {user.gender}
+                </td>
+                <td className='px-3 py-4 text-sm text-gray-900'>
+                  {user.isActive.toString()}
+                </td>
+                <td className='px-3 py-4 text-sm text-gray-900'>
+                  {user.isVerified.toString()}
                 </td>
                 <td className='px-3 py-4 text-sm font-medium flex'>
                   <button
