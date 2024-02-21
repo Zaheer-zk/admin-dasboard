@@ -1,14 +1,28 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const CreateNewUser = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [gender, setGender] = useState('');
   const navigate = useNavigate();
 
-  const handleCreateUser = (e) => {
+  const handleCreateUser = async (e) => {
     e.preventDefault();
-    console.log('Creating new user:', { name, email });
+    // console.log('Creating new user:', { name, email });
+    try {
+      const user = await axios.post('http://localhost:8000/api/create-user', {
+        name,
+        email,
+        gender,
+      });
+
+      console.log('User created', user.name);
+    } catch (error) {
+      console.error('Error creating user: ', error);
+    }
     navigate(-1);
   };
 
@@ -49,6 +63,26 @@ const CreateNewUser = () => {
             placeholder='Enter email'
             required
           />
+        </div>
+        <div className='mb-4'>
+          <label
+            htmlFor='email'
+            className='block text-sm font-medium text-gray-700'
+          >
+            Gender:
+          </label>
+          <select
+            className='mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
+            value={gender || ''}
+            onChange={(e) => setGender(e.target.value)}
+            required
+          >
+            <option value='' disabled hidden>
+              Select Gender
+            </option>
+            <option value='Male'>Male</option>
+            <option value='Female'>Female</option>
+          </select>
         </div>
         <button
           type='submit'

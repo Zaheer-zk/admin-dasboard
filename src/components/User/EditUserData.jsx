@@ -6,6 +6,7 @@ const EditUserData = ({ user, onSave, onClose }) => {
   const [isActive, setIsActive] = useState(user.isActive);
 
   const handleOptionChange = (e) => {
+    e.preventDefault();
     setIsActive(e.target.value);
   };
 
