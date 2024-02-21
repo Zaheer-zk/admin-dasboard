@@ -54,7 +54,7 @@ const Dashboard = () => {
             {
               label: label,
               data: data,
-              fill: false,
+              fill: true,
               borderColor: 'rgb(75, 192, 192)',
               tension: 0.1,
             },
