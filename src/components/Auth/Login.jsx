@@ -2,17 +2,25 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
 import OTPVerification from './OTPVerification';
+import axios from 'axios';
+import SuccessMessage from './../Common/SuccessMessage';
+import ErrorMessage from './../Common/ErrorMessage';
+// import bcrypt from 'bcrypt';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
-  const handleVerifyOTP = (otp) => {
+  const handleVerifyOTP = (otp, data) => {
     if (otp === '1234') {
       navigate('/');
+      localStorage.setItem('admin_user', JSON.stringify(data));
     } else {
       alert('Invalid OTP. Please try again.');
     }
@@ -20,11 +28,38 @@ const Login = () => {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
     try {
-      await AuthService.login(email, password);
-      setShowModal(true);
+      // await AuthService.login(email, password);
+      const loggedInUser = localStorage.getItem('admin_user');
+
+      const { data } = await axios.post(
+        'http://localhost:8000/api/login-admin',
+        {
+          email,
+          password,
+        }
+      );
+
+      console.log('Login user data', data);
+      setUser(data);
+      // const isPasswordMatch = await bcrypt.compare(
+      //   password,
+      //   adminUser.password
+      // );
+
+      // if (loggedInUser._id === data._id && isPasswordMatch) {
+      //   navigate('/');
+      // }
+
+      if (data) {
+        setShowModal(true);
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error while login as admin user', error);
+      setErrorMessage('Error while login as admin user', error);
+      setSuccessMessage('');
     }
   };
 
@@ -85,7 +120,10 @@ const Login = () => {
         showModal={showModal}
         onClose={() => setShowModal(false)}
         handleVerifyOTP={handleVerifyOTP}
+        data={user}
       />
+      {successMessage && <SuccessMessage message={successMessage} />}
+      {errorMessage && <ErrorMessage message={errorMessage} />}
     </div>
   );
 };

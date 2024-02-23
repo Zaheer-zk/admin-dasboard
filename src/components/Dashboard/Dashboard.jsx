@@ -3,22 +3,80 @@ import DashboardService from '../../services/DashboardService';
 import DashboardBox from './DashboardBox';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import Chart from 'chart.js/auto';
+import axios from 'axios';
 
 const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [verifiedUsers, setVerifiedUsers] = useState(0);
   const [newUsers, setNewUsers] = useState(0);
   const [loginActivity, setLoginActivity] = useState(0);
+  const [users, setUsers] = useState([]);
+
   const location = useLocation();
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const data = await DashboardService.fetchDashboardData();
+  //       setTotalUsers(data?.totalUsers);
+  //       setVerifiedUsers(data?.verifiedUsers);
+  //       setNewUsers(data?.newUsers);
+  //       setLoginActivity(data?.loginActivity);
+
+  //       const labels = [
+  //         'January',
+  //         'February',
+  //         'March',
+  //         'April',
+  //         'May',
+  //         'June',
+  //         'July',
+  //       ];
+  //       const dataGraph = [65, 59, 80, 81, 56, 55, 40];
+
+  //       // createChart('totalUsersChart', 'Total Users', labels, dataGraph);
+  //       // createChart('verifiedUsersChart', 'Verified Users', labels, dataGraph);
+  //       // createChart('newUsersChart', 'New Users', labels, dataGraph);
+  //       // createChart('loginActivityChart', 'Login Activity', labels, dataGraph);
+  //     } catch (error) {
+  //       console.error('Error fetching dashboard data:', error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [location]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await DashboardService.fetchDashboardData();
-        setTotalUsers(data?.totalUsers);
-        setVerifiedUsers(data?.verifiedUsers);
-        setNewUsers(data?.newUsers);
-        setLoginActivity(data?.loginActivity);
+        const { data } = await axios.get('http://localhost:8000/api/users');
+
+        console.log('All users data: ', data);
+        setUsers(data);
+
+        let verifiedUserCount = data.filter((user) => user.isVerified).length;
+        let last10DaysUserCount = data.filter((user) => {
+          const todayDate = new Date();
+          const userCreatedDate = new Date(user.createdAt);
+
+          const timeDiff = Math.abs(
+            todayDate.getTime() - userCreatedDate.getTime()
+          );
+          const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+          return diffDays <= 10;
+        }).length;
+        let todayCreatedUserCount = data.filter((user) => {
+          const todayDate = new Date();
+          const userCreatedDate = new Date(user.createdAt);
+
+          return todayDate.toDateString() === userCreatedDate.toDateString();
+        }).length;
+
+        setTotalUsers(data.length);
+        setVerifiedUsers(verifiedUserCount);
+        setNewUsers(last10DaysUserCount);
+        setLoginActivity(todayCreatedUserCount);
 
         const labels = [
           'January',
@@ -35,8 +93,8 @@ const Dashboard = () => {
         createChart('verifiedUsersChart', 'Verified Users', labels, dataGraph);
         createChart('newUsersChart', 'New Users', labels, dataGraph);
         createChart('loginActivityChart', 'Login Activity', labels, dataGraph);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+      } catch (e) {
+        console.log('data fetching error: ', e);
       }
     };
 
@@ -72,7 +130,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className='flex h-screen bg-gray-100'>
+    <div className='flex bg-gray-100'>
       {/* Sidebar */}
       <div className='w-1/4 bg-white shadow'>
         <div className='px-4 py-6'>

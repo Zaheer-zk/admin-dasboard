@@ -2,28 +2,47 @@ import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import SuccessMessage from '../Common/SuccessMessage';
+import ErrorMessage from '../Common/ErrorMessage';
 
 const CreateNewUser = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [gender, setGender] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
     // console.log('Creating new user:', { name, email });
-    try {
-      const user = await axios.post('http://localhost:8000/api/create-user', {
-        name,
-        email,
-        gender,
-      });
 
-      console.log('User created', user.name);
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    try {
+      const { data } = await axios.post(
+        'http://localhost:8000/api/create-user',
+        {
+          name,
+          email,
+          gender,
+        }
+      );
+
+      if (data) {
+        setSuccessMessage(`User created with name ${data.name}`);
+        setErrorMessage('');
+        setTimeout(() => {
+          navigate(-1);
+        }, 2000);
+        console.log('User created', data);
+      }
     } catch (error) {
-      console.error('Error creating user: ', error);
+      console.error('Error creating user: ', error?.response?.data?.message);
+      setSuccessMessage('');
+      setErrorMessage(error?.response?.data?.message);
     }
-    navigate(-1);
   };
 
   return (
@@ -91,6 +110,8 @@ const CreateNewUser = () => {
           Create User
         </button>
       </form>
+      {successMessage && <SuccessMessage message={successMessage} />}
+      {errorMessage && <ErrorMessage message={errorMessage} />}
     </div>
   );
 };

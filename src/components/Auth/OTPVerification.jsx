@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-const OTPVerification = ({ showModal, onClose, handleVerifyOTP }) => {
+const OTPVerification = ({ showModal, onClose, handleVerifyOTP, data }) => {
   const [otp, setOTP] = useState('');
 
   const handleVerify = () => {
-    handleVerifyOTP(otp);
+    handleVerifyOTP(otp, data);
     setOTP('');
   };
 

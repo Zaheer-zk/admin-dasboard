@@ -4,10 +4,14 @@ import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import EditUserData from './EditUserData';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import SuccessMessage from '../Common/SuccessMessage';
+import ErrorMessage from '../Common/ErrorMessage';
 
 const AllUsersTable = () => {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const navigate = useNavigate();
 
@@ -16,9 +20,12 @@ const AllUsersTable = () => {
   };
 
   const handleUpdateUser = (updatedUser) => {
+    console.log('updatedUser: ', updatedUser);
     const updatedUsers = users.map((user) =>
-      updatedUser.id === user.id ? updatedUser : user
+      updatedUser._id === user._id ? updatedUser : user
     );
+
+    console.log('updatedUsers: ', updatedUsers);
 
     setUsers(updatedUsers);
     setEditingUser(null);
@@ -28,10 +35,31 @@ const AllUsersTable = () => {
     setEditingUser(null);
   };
 
-  const handleDeleteUser = (user) => {
-    const updatedUsers = users.filter((u) => u.id !== user.id);
-    setUsers(updatedUsers);
-    alert(`User ${user.name} has been successfully deleted.`);
+  const handleDeleteUser = async (user) => {
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    try {
+      const { data } = await axios.delete(
+        'http://localhost:8000/api/delete-user',
+        {
+          data: {
+            id: user._id,
+          },
+        }
+      );
+
+      console.log('deletedUser: ', data.message);
+
+      if (data) {
+        setSuccessMessage(data.message);
+        const updatedUsers = users.filter((u) => u._id !== user._id);
+        setUsers(updatedUsers);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      setErrorMessage('An error occurred while deleting the user.');
+    }
   };
 
   useEffect(() => {
@@ -39,7 +67,7 @@ const AllUsersTable = () => {
       try {
         const { data } = await axios.get('http://localhost:8000/api/users');
 
-        console.log('data: ', data);
+        console.log('All users data: ', data);
         setUsers(data);
       } catch (e) {
         console.log('data fetching error: ', e);
@@ -150,8 +178,12 @@ const AllUsersTable = () => {
             user={editingUser}
             onSave={handleUpdateUser}
             onClose={handleClose}
+            setSuccessMessage={setSuccessMessage}
+            setErrorMessage={setErrorMessage}
           />
         )}
+        {successMessage && <SuccessMessage message={successMessage} />}
+        {errorMessage && <ErrorMessage message={errorMessage} />}
       </div>
     </div>
   );

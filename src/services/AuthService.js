@@ -14,6 +14,15 @@ class AuthService {
       throw new Error('Registration failed');
     }
   }
+
+  static async checkIfUserIsLoggedIn() {
+    const user = localStorage.getItem('adminUser');
+    if (user) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 export default AuthService;
