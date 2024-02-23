@@ -19,8 +19,8 @@ const Login = () => {
 
   const handleVerifyOTP = (otp, data) => {
     if (otp === '1234') {
-      navigate('/');
       localStorage.setItem('admin_user', JSON.stringify(data));
+      navigate('/');
     } else {
       alert('Invalid OTP. Please try again.');
     }

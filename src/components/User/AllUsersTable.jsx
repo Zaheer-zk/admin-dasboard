@@ -12,6 +12,8 @@ const AllUsersTable = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const navigate = useNavigate();
 
@@ -35,30 +37,34 @@ const AllUsersTable = () => {
     setEditingUser(null);
   };
 
-  const handleDeleteUser = async (user) => {
-    setErrorMessage('');
-    setSuccessMessage('');
+  const handleDeleteUser = (user) => {
+    setUserToDelete(user);
+    setShowDeleteConfirmation(true);
+  };
 
-    try {
-      const { data } = await axios.delete(
-        'http://localhost:8000/api/delete-user',
-        {
-          data: {
-            id: user._id,
-          },
+  const confirmDeleteUser = async () => {
+    setShowDeleteConfirmation(false);
+
+    if (userToDelete) {
+      try {
+        const { data } = await axios.delete(
+          'http://localhost:8000/api/delete-user',
+          {
+            data: {
+              id: userToDelete._id,
+            },
+          }
+        );
+
+        if (data) {
+          setSuccessMessage(data.message);
+          const updatedUsers = users.filter((u) => u._id !== userToDelete._id);
+          setUsers(updatedUsers);
         }
-      );
-
-      console.log('deletedUser: ', data.message);
-
-      if (data) {
-        setSuccessMessage(data.message);
-        const updatedUsers = users.filter((u) => u._id !== user._id);
-        setUsers(updatedUsers);
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        setErrorMessage('An error occurred while deleting the user.');
       }
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      setErrorMessage('An error occurred while deleting the user.');
     }
   };
 
@@ -184,6 +190,27 @@ const AllUsersTable = () => {
         )}
         {successMessage && <SuccessMessage message={successMessage} />}
         {errorMessage && <ErrorMessage message={errorMessage} />}
+        {showDeleteConfirmation && (
+          <div className='fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50'>
+            <div className='bg-white p-6 rounded-lg max-w-md'>
+              <p>Are you sure you want to delete this user?</p>
+              <div className='mt-4 flex justify-end'>
+                <button
+                  className='px-4 py-2 mr-2 bg-red-500 text-white rounded-md'
+                  onClick={confirmDeleteUser}
+                >
+                  Delete
+                </button>
+                <button
+                  className='px-4 py-2 bg-gray-300 rounded-md'
+                  onClick={() => setShowDeleteConfirmation(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
