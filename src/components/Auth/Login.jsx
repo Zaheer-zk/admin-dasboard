@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthService from '../../services/AuthService';
+// import AuthService from '../../services/AuthService';
 import OTPVerification from './OTPVerification';
 import axios from 'axios';
 import SuccessMessage from '../Common/SuccessMessage';
@@ -33,7 +33,7 @@ const Login = () => {
     setSuccessMessage('');
     try {
       // await AuthService.login(email, password);
-      const loggedInUser = localStorage.getItem('admin_user');
+      // const loggedInUser = localStorage.getItem('admin_user');
 
       const { data } = await axios.post(`${API_URL}/api/login-admin`, {
         email,

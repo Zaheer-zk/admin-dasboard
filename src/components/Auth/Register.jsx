@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthService from '../../services/AuthService';
+// import AuthService from '../../services/AuthService';
 import axios from 'axios';
 import SuccessMessage from './../Common/SuccessMessage';
 import ErrorMessage from './../Common/ErrorMessage';

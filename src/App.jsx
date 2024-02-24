@@ -10,7 +10,6 @@ import Dashboard from './components/Dashboard/Dashboard';
 import DashboardBox from './components/Dashboard/DashboardBox';
 import AllUsersTable from './components/User/AllUsersTable';
 import CreateNewUser from './components/User/CreateNewUser';
-import AuthService from './services/AuthService';
 import { useEffect, useState } from 'react';
 
 export const router = createBrowserRouter([
@@ -65,7 +64,7 @@ function App() {
         navigate('login');
       }
     }
-  }, []);
+  }, [isLoggedIn]);
 
   return (
     <div className>
