@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SuccessMessage from '../Common/SuccessMessage';
 import ErrorMessage from '../Common/ErrorMessage';
+import { API_URL } from '../../Constants/constants';
 
 const CreateNewUser = () => {
   const [name, setName] = useState('');
@@ -22,15 +23,12 @@ const CreateNewUser = () => {
     setSuccessMessage('');
 
     try {
-      const { data } = await axios.post(
-        'http://localhost:8000/api/create-user',
-        {
-          name,
-          email,
-          password,
-          gender,
-        }
-      );
+      const { data } = await axios.post(`${API_URL}/api/create-user`, {
+        name,
+        email,
+        password,
+        gender,
+      });
 
       if (data) {
         setSuccessMessage(`User created with name ${data.name}`);

@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
+import { API_URL } from '../../Constants/constants';
 
 const AllUsersTable = () => {
   const [users, setUsers] = useState([]);
@@ -61,14 +62,11 @@ const AllUsersTable = () => {
 
     if (userToDelete) {
       try {
-        const { data } = await axios.delete(
-          'http://localhost:8000/api/delete-user',
-          {
-            data: {
-              id: userToDelete._id,
-            },
-          }
-        );
+        const { data } = await axios.delete(`${API_URL}/api/delete-user`, {
+          data: {
+            id: userToDelete._id,
+          },
+        });
 
         if (data) {
           setSuccessMessage(data.message);
@@ -85,7 +83,7 @@ const AllUsersTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get('http://localhost:8000/api/users');
+        const { data } = await axios.get(`${API_URL}/api/users`);
         setUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);

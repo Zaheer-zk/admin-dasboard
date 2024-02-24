@@ -6,6 +6,7 @@ import axios from 'axios';
 import SuccessMessage from '../Common/SuccessMessage';
 import ErrorMessage from '../Common/ErrorMessage';
 // import bcrypt from 'bcrypt';
+import { API_URL } from './../../Constants/constants';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -34,13 +35,10 @@ const Login = () => {
       // await AuthService.login(email, password);
       const loggedInUser = localStorage.getItem('admin_user');
 
-      const { data } = await axios.post(
-        'http://localhost:8000/api/login-admin',
-        {
-          email,
-          password,
-        }
-      );
+      const { data } = await axios.post(`${API_URL}/api/login-admin`, {
+        email,
+        password,
+      });
 
       console.log('Login user data', data);
       setUser(data);

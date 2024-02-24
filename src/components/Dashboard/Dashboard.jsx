@@ -9,6 +9,7 @@ import { faKey, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import ShowChangePassword from '../User/ShowChangePassword';
 import SuccessMessage from '../Common/SuccessMessage';
 import ErrorMessage from '../Common/ErrorMessage';
+import { API_URL } from './../../Constants/constants';
 
 const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
@@ -72,14 +73,11 @@ const Dashboard = () => {
     const id = adminUser._id;
     console.log(id);
     try {
-      const { data } = await axios.post(
-        'http://localhost:8000/api/change-password',
-        {
-          id: id,
-          currentPassword: currentPassword,
-          newChangePassword: newChangePassword,
-        }
-      );
+      const { data } = await axios.post(`${API_URL}/api/change-password`, {
+        id: id,
+        currentPassword: currentPassword,
+        newChangePassword: newChangePassword,
+      });
 
       if (data) {
         localStorage.setItem('admin_user', JSON.stringify(data));
@@ -104,7 +102,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get('http://localhost:8000/api/users');
+        const { data } = await axios.get(`${API_URL}/api/users`);
 
         console.log('All users data: ', data);
         setUsers(data);

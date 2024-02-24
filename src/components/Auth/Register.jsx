@@ -4,6 +4,7 @@ import AuthService from '../../services/AuthService';
 import axios from 'axios';
 import SuccessMessage from './../Common/SuccessMessage';
 import ErrorMessage from './../Common/ErrorMessage';
+import { API_URL } from '../../Constants/constants';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -21,14 +22,11 @@ const Register = () => {
     try {
       // await AuthService.register(email, password);
 
-      const { data } = await axios.post(
-        'http://localhost:8000/api/create-admin',
-        {
-          username,
-          email,
-          password,
-        }
-      );
+      const { data } = await axios.post(`${API_URL}/api/create-admin`, {
+        username,
+        email,
+        password,
+      });
 
       console.log('Admin user created successfully', data);
 

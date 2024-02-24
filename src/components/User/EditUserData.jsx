@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../Constants/constants';
 
 const EditUserData = ({
   user,
@@ -25,15 +26,12 @@ const EditUserData = ({
     console.log(user);
 
     try {
-      const { data } = await axios.put(
-        'http://localhost:8000/api/update-user',
-        {
-          id: user._id,
-          name,
-          email,
-          isActive,
-        }
-      );
+      const { data } = await axios.put(`${API_URL}/api/update-user`, {
+        id: user._id,
+        name,
+        email,
+        isActive,
+      });
 
       console.log('Updated data: ', data);
 
