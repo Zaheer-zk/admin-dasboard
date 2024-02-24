@@ -64,7 +64,7 @@ function App() {
         navigate('login');
       }
     }
-  }, [isLoggedIn]);
+  }, []);
 
   return (
     <div className>
