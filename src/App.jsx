@@ -1,4 +1,9 @@
-import { Outlet, createBrowserRouter, useNavigate } from 'react-router-dom';
+import {
+  Outlet,
+  createBrowserRouter,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -41,6 +46,27 @@ export const router = createBrowserRouter([
 ]);
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    localStorage.getItem('admin_user') ? true : false
+  );
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem('admin_user') ? true : false);
+
+    if (!isLoggedIn) {
+      console.log('isLoggedIn: ', isLoggedIn);
+      console.log('location.pathname: ', location.pathname);
+      if (location.pathname === '/register') {
+        navigate('register');
+      } else {
+        navigate('login');
+      }
+    }
+  }, []);
+
   return (
     <div className>
       <Outlet />

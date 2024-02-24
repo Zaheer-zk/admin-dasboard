@@ -6,6 +6,20 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SuccessMessage from '../Common/SuccessMessage';
 import ErrorMessage from '../Common/ErrorMessage';
+import ConfirmDeleteUserModel from './ConfirmDeleteUserModel';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TextField,
+} from '@mui/material';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
 
 const AllUsersTable = () => {
   const [users, setUsers] = useState([]);
@@ -14,6 +28,9 @@ const AllUsersTable = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const navigate = useNavigate();
 
@@ -22,12 +39,9 @@ const AllUsersTable = () => {
   };
 
   const handleUpdateUser = (updatedUser) => {
-    console.log('updatedUser: ', updatedUser);
     const updatedUsers = users.map((user) =>
       updatedUser._id === user._id ? updatedUser : user
     );
-
-    console.log('updatedUsers: ', updatedUsers);
 
     setUsers(updatedUsers);
     setEditingUser(null);
@@ -72,113 +86,117 @@ const AllUsersTable = () => {
     const fetchData = async () => {
       try {
         const { data } = await axios.get('http://localhost:8000/api/users');
-
-        console.log('All users data: ', data);
         setUsers(data);
-      } catch (e) {
-        console.log('data fetching error: ', e);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setErrorMessage('Error fetching users');
       }
     };
 
     fetchData();
   }, []);
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const indexOfLastUser = currentPage * itemsPerPage;
+  const indexOfFirstUser = indexOfLastUser - itemsPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
   return (
     <div className='overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg'>
-      <div className='flex justify-between bg-gray-50 px-4 py-3'>
-        <div>
-          <h2 className='text-lg font-semibold text-gray-900'>All Users</h2>
-        </div>
-        <div>
-          <button
-            className='py-2.5 px-4 rounded transition duration-200 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 hover:text-white shadow-md flex items-center'
+      <div className='bg-gray-50 px-4 py-3 flex justify-between items-center'>
+        <h2 className='text-lg font-semibold text-gray-900'>All Users</h2>
+        <div className='flex items-center justify-between '>
+          <Button
+            variant='contained'
+            color='primary'
             onClick={() => navigate('/create-user')}
+            className='bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition duration-300 ease-in-out ml-4'
           >
             <FontAwesomeIcon icon={faPlus} className='mr-2' />
             Create User
-          </button>
+          </Button>
         </div>
       </div>
-      <div className='px-4 py-2 overflow-y-auto  h-screen'>
-        <table className='min-w-full divide-y divide-gray-200'>
-          <thead className='bg-gray-50'>
-            <tr>
-              <th
-                scope='col'
-                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-              >
-                User Name
-              </th>
-              <th
-                scope='col'
-                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-              >
-                Email
-              </th>
-              <th
-                scope='col'
-                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-              >
-                Gender
-              </th>
-              <th
-                scope='col'
-                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-              >
-                Is Active
-              </th>
-              <th
-                scope='col'
-                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-              >
-                Is Verified
-              </th>
-              <th
-                scope='col'
-                className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className='divide-y divide-gray-200'>
-            {users.length === 0 && <h2>No users found</h2>}
-            {users.map((user, index) => (
-              <tr key={index}>
-                <td className='px-3 py-4 text-sm text-gray-900'>{user.name}</td>
-                <td className='px-3 py-4 text-sm text-gray-900'>
-                  {user.email}
-                </td>
-                <td className='px-3 py-4 text-sm text-gray-900'>
-                  {user.gender}
-                </td>
-                <td className='px-3 py-4 text-sm text-gray-900'>
-                  {user.isActive.toString()}
-                </td>
-                <td className='px-3 py-4 text-sm text-gray-900'>
-                  {user.isVerified.toString()}
-                </td>
-                <td className='px-3 py-4 text-sm font-medium flex'>
-                  <button
-                    className='flex items-center text-indigo-600 hover:text-indigo-900'
-                    onClick={() => handleEditUser(user)}
-                  >
-                    <FontAwesomeIcon icon={faEdit} className='mr-1' />
-                    Edit
-                  </button>
 
-                  <button
-                    className='flex items-center text-red-600 hover:text-red-900 ml-3'
-                    onClick={() => handleDeleteUser(user)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} className='mr-1' />
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className='px-4 py-2 overflow-y-auto h-full'>
+        <div className='flex justify-end mb-2'>
+          <TextField
+            label='Search'
+            variant='outlined'
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className='w-[350px]'
+            InputProps={{
+              className:
+                'bg-gray-100 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500 rounded-md',
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </div>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow className='bg-blue-500'>
+                <TableCell>
+                  <span className='text-white'>User Name</span>
+                </TableCell>
+                <TableCell>
+                  <span className='text-white'>Email</span>
+                </TableCell>
+                <TableCell>
+                  <span className='text-white'>Gender</span>
+                </TableCell>
+                <TableCell>
+                  <span className='text-white'>Is Active</span>
+                </TableCell>
+                <TableCell>
+                  <span className='text-white'>Is Verified</span>
+                </TableCell>
+                <TableCell>
+                  <span className='text-white'>Actions</span>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {currentUsers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6}>No users found</TableCell>
+                </TableRow>
+              )}
+              {currentUsers.map((user, index) => (
+                <TableRow key={index}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.gender}</TableCell>
+                  <TableCell>{user.isActive.toString()}</TableCell>
+                  <TableCell>{user.isVerified.toString()}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleEditUser(user)}>
+                      <FontAwesomeIcon icon={faEdit} className='mr-1' />
+                      Edit
+                    </Button>
+                    <Button onClick={() => handleDeleteUser(user)}>
+                      <FontAwesomeIcon icon={faTrash} className='mr-1' />
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
         {editingUser && (
           <EditUserData
             user={editingUser}
@@ -191,26 +209,33 @@ const AllUsersTable = () => {
         {successMessage && <SuccessMessage message={successMessage} />}
         {errorMessage && <ErrorMessage message={errorMessage} />}
         {showDeleteConfirmation && (
-          <div className='fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50'>
-            <div className='bg-white p-6 rounded-lg max-w-md'>
-              <p>Are you sure you want to delete this user?</p>
-              <div className='mt-4 flex justify-end'>
-                <button
-                  className='px-4 py-2 mr-2 bg-red-500 text-white rounded-md'
-                  onClick={confirmDeleteUser}
-                >
-                  Delete
-                </button>
-                <button
-                  className='px-4 py-2 bg-gray-300 rounded-md'
-                  onClick={() => setShowDeleteConfirmation(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
+          <ConfirmDeleteUserModel
+            confirmDeleteUser={confirmDeleteUser}
+            setShowDeleteConfirmation={setShowDeleteConfirmation}
+          />
         )}
+      </div>
+      <div className='flex justify-center mt-4'>
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-2 ${
+            currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          Previous
+        </button>
+        <button
+          disabled={indexOfLastUser >= users.length}
+          onClick={() => setCurrentPage(currentPage + 1)}
+          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ${
+            indexOfLastUser >= users.length
+              ? 'opacity-50 cursor-not-allowed'
+              : ''
+          }`}
+        >
+          Next
+        </button>
       </div>
     </div>
   );

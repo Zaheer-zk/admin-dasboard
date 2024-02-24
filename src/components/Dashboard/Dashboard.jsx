@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import DashboardService from '../../services/DashboardService';
 import DashboardBox from './DashboardBox';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Chart from 'chart.js/auto';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faKey, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import ShowChangePassword from '../User/ShowChangePassword';
+import SuccessMessage from '../Common/SuccessMessage';
+import ErrorMessage from '../Common/ErrorMessage';
 
 const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
@@ -11,8 +16,19 @@ const Dashboard = () => {
   const [newUsers, setNewUsers] = useState(0);
   const [loginActivity, setLoginActivity] = useState(0);
   const [users, setUsers] = useState([]);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    localStorage.getItem('admin_user') ? true : false
+  );
+  const [adminUser, setAdminUser] = useState(
+    JSON.parse(localStorage.getItem('admin_user'))
+  );
+
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -45,6 +61,45 @@ const Dashboard = () => {
 
   //   fetchData();
   // }, [location]);
+
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem('admin_user') ? true : false);
+    setAdminUser(JSON.parse(localStorage.getItem('admin_user')));
+  }, []);
+
+  const updatePassword = async (currentPassword, newChangePassword) => {
+    setShowChangePassword(false);
+    const id = adminUser._id;
+    console.log(id);
+    try {
+      const { data } = await axios.post(
+        'http://localhost:8000/api/change-password',
+        {
+          id: id,
+          currentPassword: currentPassword,
+          newChangePassword: newChangePassword,
+        }
+      );
+
+      if (data) {
+        localStorage.setItem('admin_user', JSON.stringify(data));
+        setAdminUser(data);
+        setSuccessMessage('Password changed successfully');
+        setErrorMessage('');
+      }
+    } catch (error) {
+      setSuccessMessage('');
+      setErrorMessage(error.response.data.message);
+      console.error(
+        'Error while changing password: ',
+        error.response.data.message
+      );
+    }
+  };
+
+  const handleChangePassword = () => {
+    setShowChangePassword(true);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,12 +142,24 @@ const Dashboard = () => {
           'June',
           'July',
         ];
-        const dataGraph = [65, 59, 80, 81, 56, 55, 40];
-
-        createChart('totalUsersChart', 'Total Users', labels, dataGraph);
-        createChart('verifiedUsersChart', 'Verified Users', labels, dataGraph);
-        createChart('newUsersChart', 'New Users', labels, dataGraph);
-        createChart('loginActivityChart', 'Login Activity', labels, dataGraph);
+        const totalUsersData = [1500, 1800, 2000, 2200, 2500, 2800, 3000];
+        createChart('totalUsersChart', 'Total Users', labels, totalUsersData);
+        const verifiedUsersData = [50, 10, 15, 60, 50, 60, 45];
+        createChart(
+          'verifiedUsersChart',
+          'Verified Users',
+          labels,
+          verifiedUsersData
+        );
+        const newUsersData = [200, 100, 600, 20, 400, 500, 300];
+        createChart('newUsersChart', 'New Users', labels, newUsersData);
+        const loginActivityData = [200, 180, 220, 210, 240, 230, 250];
+        createChart(
+          'loginActivityChart',
+          'Login Activity',
+          labels,
+          loginActivityData
+        );
       } catch (e) {
         console.log('data fetching error: ', e);
       }
@@ -132,12 +199,12 @@ const Dashboard = () => {
   return (
     <div className='flex bg-gray-100'>
       {/* Sidebar */}
-      <div className='w-1/4 bg-white shadow'>
+      <div className='w-1/4 bg-white shadow h-lvh'>
         <div className='px-4 py-6'>
           <h2 className='text-3xl font-semibold text-gray-700'>
             Admin Dashboard
           </h2>
-          <nav className='mt-6'>
+          <nav className='mt-6 flex flex-col justify-between h-full'>
             <div>
               <Link
                 to={'/'}
@@ -151,6 +218,29 @@ const Dashboard = () => {
               >
                 Users
               </Link>
+            </div>
+            <div className='absolute bottom-6 left-6'>
+              <div className='flex justify-between flex-col'>
+                <button
+                  className='p-3 bg-blue-500 hover:bg-blue-950 rounded-lg hover:text-white w-[12rem] ml-2 shadow-lg'
+                  onClick={handleChangePassword}
+                >
+                  <FontAwesomeIcon icon={faKey} className='mr-2' />
+                  Change password
+                </button>
+                {isLoggedIn && (
+                  <button
+                    className='p-3 bg-blue-500 hover:bg-blue-950 rounded-lg hover:text-white m-2 w-[12rem] shadow-lg'
+                    onClick={() => {
+                      localStorage.removeItem('admin_user');
+                      navigate('/login');
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faSignOutAlt} className='mr-2' />
+                    Log Out
+                  </button>
+                )}
+              </div>
             </div>
           </nav>
         </div>
@@ -186,6 +276,15 @@ const Dashboard = () => {
           <Outlet />
         </div>
       )}
+      {showChangePassword && (
+        <ShowChangePassword
+          updatePassword={updatePassword}
+          setShowChangePassword={setShowChangePassword}
+        />
+      )}
+
+      {successMessage && <SuccessMessage message={successMessage} />}
+      {errorMessage && <ErrorMessage message={errorMessage} />}
     </div>
   );
 };

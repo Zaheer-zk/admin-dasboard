@@ -7,7 +7,7 @@ const SuccessMessage = ({ message }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (progress > 0) {
-        setProgress((prevProgress) => prevProgress - 10);
+        setProgress((prevProgress) => prevProgress - 5);
       } else {
         setIsVisible(false);
         clearInterval(interval);

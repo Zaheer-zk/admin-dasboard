@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
 import OTPVerification from './OTPVerification';
 import axios from 'axios';
-import SuccessMessage from './../Common/SuccessMessage';
-import ErrorMessage from './../Common/ErrorMessage';
+import SuccessMessage from '../Common/SuccessMessage';
+import ErrorMessage from '../Common/ErrorMessage';
 // import bcrypt from 'bcrypt';
 
 const Login = () => {
