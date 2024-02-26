@@ -137,6 +137,10 @@ const AllUsersTable = () => {
     return <Loader />;
   }
 
+  if (error) {
+    return <h1>{`Error!!!! ${error}`}</h1>;
+  }
+
   return (
     <div className='overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg'>
       <div className='bg-gray-50 px-4 py-3 flex justify-between items-center'>
