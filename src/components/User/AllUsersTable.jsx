@@ -21,8 +21,31 @@ import {
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import { API_URL } from '../../Constants/constants';
+import { gql, useQuery } from '@apollo/client';
+import Loader from './../Common/Loader';
+
+const USERS = gql`
+  query GetAllUsers {
+    users {
+      _id
+      name
+      email
+      gender
+      isActive
+      isVerified
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 const AllUsersTable = () => {
+  const { data, loading, error } = useQuery(USERS);
+
+  console.log('data', data);
+  console.log('loading', loading);
+  console.log('error', error);
+
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
@@ -104,7 +127,15 @@ const AllUsersTable = () => {
 
   const indexOfLastUser = currentPage * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const reversedFilteredUsers = [...filteredUsers].reverse();
+  const currentUsers = reversedFilteredUsers.slice(
+    indexOfFirstUser,
+    indexOfLastUser
+  );
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className='overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg'>
