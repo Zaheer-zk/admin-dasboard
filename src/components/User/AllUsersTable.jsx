@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import EditUserData from './EditUserData';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SuccessMessage from '../Common/SuccessMessage';
 import ErrorMessage from '../Common/ErrorMessage';
@@ -23,6 +23,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { API_URL } from '../../Constants/constants';
 import { gql, useQuery } from '@apollo/client';
 import Loader from './../Common/Loader';
+import MUIDateRangePicker from '../Common/MUIDateRangePicker';
+import BasicDateCalendar from '../Common/BasicDateCalendar';
 
 const USERS = gql`
   query GetAllUsers {
@@ -42,11 +44,8 @@ const USERS = gql`
 const AllUsersTable = () => {
   const { data, loading, error } = useQuery(USERS);
 
-  console.log('data', data);
-  console.log('loading', loading);
-  console.log('error', error);
-
   const [users, setUsers] = useState([]);
+  const [completeUsers, setCompleteUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -55,8 +54,13 @@ const AllUsersTable = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleEditUser = (user) => {
     setEditingUser(user);
@@ -108,6 +112,7 @@ const AllUsersTable = () => {
       try {
         const { data } = await axios.get(`${API_URL}/api/users`);
         setUsers(data);
+        setCompleteUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);
         setErrorMessage('Error fetching users');
@@ -115,7 +120,45 @@ const AllUsersTable = () => {
     };
 
     fetchData();
-  }, []);
+  }, [location]);
+
+  const setErrorWithDelay = (message, delay) => {
+    setTimeout(() => {
+      setErrorMessage(message);
+    }, delay);
+  };
+
+  const handleFilterByDate = () => {
+    setErrorMessage('');
+    if (startDate >= endDate) {
+      setErrorWithDelay('Please select end date greater than start date', 100);
+    } else {
+      const filteredUsers = completeUsers.filter((user) => {
+        const userDate = new Date(user.createdAt).getDate();
+        return userDate >= startDate && userDate <= endDate;
+      });
+
+      setUsers(filteredUsers);
+    }
+  };
+
+  const clearFilters = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setShowDatePicker(false);
+    setErrorMessage('');
+    fetchData();
+  };
+
+  const fetchData = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/users`);
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setErrorMessage('Error fetching users');
+    }
+  };
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -159,7 +202,47 @@ const AllUsersTable = () => {
       </div>
 
       <div className='px-4 py-2 overflow-y-auto h-full'>
-        <div className='flex justify-end mb-2'>
+        {showDatePicker && (
+          <div className='flex justify-center flex-row'>
+            <BasicDateCalendar setStartDate={setStartDate} text='Start Date' />
+            <BasicDateCalendar setEndDate={setEndDate} text='End Date' />
+          </div>
+        )}
+        <div className='flex justify-between mb-2 '>
+          {!showDatePicker ? (
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={() => setShowDatePicker(true)}
+              className='bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition duration-300 ease-in-out ml-4'
+            >
+              Filter by Date
+            </Button>
+          ) : (
+            <div className='flex'>
+              <Button
+                variant='contained'
+                color='primary'
+                onClick={clearFilters}
+                className='bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition duration-300 ease-in-out'
+                style={{
+                  marginRight: '10px',
+                  backgroundColor: 'crimson',
+                }}
+              >
+                Clear Filters
+              </Button>
+
+              <Button
+                variant='contained'
+                color='primary'
+                onClick={handleFilterByDate}
+                className='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow-md transition duration-300 ease-in-out ml-4'
+              >
+                Apply Filters
+              </Button>
+            </div>
+          )}
           <TextField
             label='Search'
             variant='outlined'
